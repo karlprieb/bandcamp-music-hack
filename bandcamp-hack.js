@@ -9,24 +9,23 @@ let regex = /\{\"mp3-128\"\:\"\/\/(\S+)\"\}/gmi;
 function callback () {
 	let stringfied = list.join('');
 	let url = 'https://' + regex.exec(stringfied)[1];
-
 	let curlFetchMP3 = downloadMP3(url);
 
 	curlFetchMP3.stdout.on('data', (data) => {
 		console.log('downloading process...')
 	});
 
-	curlFetchMP3.stderr.on('data', (data) => {
+	/*curlFetchMP3.stderr.on('data', (data) => {
 		console.log(`stdeer: ${data}`);
 	});
-
+*/
 	curlFetchMP3.on('close', (code) => {
 		 console.log(`DONE DOWNLOAD! ${code}`);
 	});	
 }
 
 function downloadMP3 (url) {
-	return spawn('curl', ['-o', 'somefile.mp3', url]);
+	return spawn('wget', ['-O', 'somefile.mp3', url]);
 } 
 
 curlFetchHTML.stdout.on('data', (data) => {
