@@ -1,0 +1,29 @@
+{
+  "name": "bandcamp-music-hack",
+  "version": "1.0.0",
+  "description": "a script to hack paid songs from bandcamp.",
+  "main": "bandcamp-hack.js",
+  "dependencies": {
+    "cheerio": "^0.20.0",
+    "commander": "^2.9.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/acmello/bandcamp-music-hack.git"
+  },
+  "keywords": [
+    "bandcamp",
+    "indiemusic",
+    "hack"
+  ],
+  "author": "acmello",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/acmello/bandcamp-music-hack/issues"
+  },
+  "homepage": "https://github.com/acmello/bandcamp-music-hack#readme"
+}
