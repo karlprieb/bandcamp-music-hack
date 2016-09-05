@@ -1,32 +1,44 @@
-let spawn 			= require('child_process').spawn;
+const spawn = require('child_process').spawn;
 
-function crawl (content) {
-	this.downloadMP3 = function (url, name) {
-		return spawn('wget', ['-O', `${name}.mp3`, url]);
-	} 
+let _contentHTML;
+let _MP3Regx;     
+let _extractMP3Url;
+let _URL;
+let _mp3;
 
-	const contentHTML 	= content.join('');
-	const MP3Regx 		= /\{\"mp3-128\"\:\"\/\/(\S+)\"\}/gmi;
-	const extractMP3Url = MP3Regx.exec(contentHTML)[1];
-	const URL			= `http://${extractMP3Url}`;
-	const mp3 			= spawn('wget', ['-O', 'test.mp3', URL]);
+function _bindMP3 (mp3) {
+    mp3.stdout.on('data', (data) => {
+        console.log('currently download mp3...');
+    });
 
-	mp3.stdout.on('data', (data) => {
-		console.log('currently download mp3...');
-	});
+    mp3.stderr.on('data', (data) => {
+        console.log(`Error: ${data}`);
+    });
 
-	mp3.stderr.on('data', (data) => {
-		console.log(`Error: ${data}`);
-	});
+    mp3.on('close', (code) => {
+        if(code === 0) {
+            console.log('Download successfully done');
+            return
+        }
 
-	mp3.on('close', (code) => {
-		if(code === 0) {
-			console.log('Download successfully done');
-			return
-		}
-
-		console.log(`Something went wrong: ${code}`);
-	});
+        console.log(`Something went wrong: ${code}`);
+    });
 }
 
-exports.crawl = crawl;
+class BchCrawler {
+    constructor (content) {
+        this.content = content;
+    }
+
+    crawl () {
+        _contentHTML   = this.content.join('');
+        _MP3Regx       = /\{\"mp3-128\"\:\"\/\/(\S+)\"\}/gmi;
+        _extractMP3Url = _MP3Regx.exec(_contentHTML)[1];
+        _URL           = `http://${_extractMP3Url}`;
+        _mp3           = spawn('wget', ['-O', 'lost.mp3', _URL]);
+
+        _bindMP3.bind(this)(_mp3);
+    }
+}
+
+exports.BchCrawler = BchCrawler;

@@ -1,27 +1,34 @@
-const spawn 	= require('child_process').spawn;
-const bcCrawler = require('./bch-crawler'); 
+const spawn     = require('child_process').spawn;
+const crawler = require('./bch-crawler'); 
 
-function fetch (url) {
-	let fetchedHTML = spawn('curl', [url]);
-	let content 	= [];
+class BchFetch {
+    constructor(url) {
+        this.fetchedHTML = spawn('curl', [url]);
+        this.content     = [];
+        this.crawler;
+    }
 
-	this.fetchOneTrack = () => {
-		fetchedHTML.stdout.on('data', (data) => {
-			content.push(data.toString());
-		});
+    fetchOneTrack () {
+        this.fetchedHTML.stdout.on('data', (data) => {
+            this.content.push(data.toString());
+        });
 
-		fetchedHTML.stderr.on('data', (data) => {
-			console.log(`stderr: ${data}`);
-		});
+        this.fetchedHTML.stderr.on('data', (data) => {
+            //console.log(`stderr: ${data}`);
+            console.log('Fetching necessary data from bandcamp. Please wait...');
+        });
 
-		fetchedHTML.on('close', (code) => {
-			bcCrawler.crawl(content);
-		});
-	};
+        this.fetchedHTML.on('close', (code) => {
+            this.crawler = new crawler.BchCrawler(this.content);
+            this.crawler.crawl(); 
+            //console.log(crawler);
+        });
+    }
 
-	this.fetchMultipleTracks = () => {
-		console.log('teste');
-	};
+    fetchMultipleTracks () {
+        // TODO
+        throw 'Not yet implemented';
+    };
 }
 
-exports.fetch = fetch;
+exports.BchFetch = BchFetch;
