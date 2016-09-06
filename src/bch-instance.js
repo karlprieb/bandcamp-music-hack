@@ -27,13 +27,13 @@ class BchHack {
 
         let url = commander.args[0];
 
-        if (commander.artist) {
+        if (commander.album) {
             if (! _validAlbumURLRgx.test(url)) {
                 throw 'Error: URL does not match. See -h for help.';
             }
 
-            let bchFetch = new fetch.BchFetch(url);
-            bchFetch.fetchMultipleTracks();
+            let bchFetch = new fetch.BchFetch();
+            bchFetch.fetchMultipleTracks(url);
         }
 
         if (commander.track) {
@@ -41,8 +41,8 @@ class BchHack {
                 throw 'Error: URL does not match. See -h for help.';
             }
           
-            let bchFetch = new fetch.BchFetch(url);
-            bchFetch.fetchOneTrack();
+            let bchFetch = new fetch.BchFetch();
+            bchFetch.fetchOneTrack(url);
         }
     }
 }
