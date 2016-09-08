@@ -47,4 +47,4 @@ class BchHack {
     }
 }
 
-new BchHack();
+exports.BchHack = BchHack;
