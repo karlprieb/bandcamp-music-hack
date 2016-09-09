@@ -11,9 +11,9 @@ let _artist;
 let _track;
 
 function _bindMP3 (mp3, _song) {
-    mp3.stderr.on('data', (data) => {
-       // console.log(`${_song}: ${data}`);
-    });
+    /*mp3.stderr.on('data', (data) => {
+       console.log(`${_song}: ${data}`);
+    });*/
 
     mp3.on('close', (code) => {
         if(code === 0) {
@@ -32,7 +32,7 @@ class BchCrawler {
         _contentHTML   = this.content.join('');
         _MP3Regx = /\{\"mp3-128\"\:\"\/\/(\S+)\"\}/i;
         let spawn     = require('child_process').spawn;
-        let matchMP3Str =_MP3Regx.test(_contentHTML) 
+        let matchMP3Str =_MP3Regx.test(_contentHTML); 
 
         if (matchMP3Str) {
             _selector      = cheerio.load(_contentHTML);

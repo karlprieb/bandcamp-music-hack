@@ -11,6 +11,10 @@ class BchFetch {
         let fetchedHTML = spawn('curl', [url]);
         let content = [];
 
+        fetchedHTML.stdout.on('data', (data) => {
+            content.push(data.toString());
+        });
+
         fetchedHTML.on('close', (code) => {
             this.crawler = new crawler.BchCrawler(content);
             this.crawler.crawl(); 
@@ -26,6 +30,10 @@ class BchFetch {
             content.push(data.toString());
         });
 
+        /*fetchedHTML.stderr.on('data', (err) => {
+            console.log(`${err}`);
+        });*/
+
         fetchedHTML.on('close', (code) => {
             if (code === 0) {
                 let $ = cheerio.load(content.join(''));
@@ -38,6 +46,8 @@ class BchFetch {
                 songsEls.each(function () {
                     let trackURL = $(this).attr('href').trim();
                     let finalURL = `https://${baseURL}${trackURL}`;
+                    //console.log(finalURL);
+
                     self.fetchOneTrack(finalURL);
                 })
 

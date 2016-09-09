@@ -28,6 +28,8 @@ class BchHack {
         let url = commander.args[0];
 
         if (commander.album) {
+            console.log('Downloading the album...');
+            
             if (! _validAlbumURLRgx.test(url)) {
                 throw 'Error: URL does not match. See -h for help.';
             }
@@ -37,6 +39,8 @@ class BchHack {
         }
 
         if (commander.track) {
+            console.log('Downloading the track...');
+
             if (! _validMP3URLRgx.test(url)) {
                 throw 'Error: URL does not match. See -h for help.';
             }
@@ -47,4 +51,4 @@ class BchHack {
     }
 }
 
-exports.BchHack = BchHack;
+new BchHack();
