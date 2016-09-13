@@ -1,5 +1,4 @@
 const commander = require('commander');
-const spawn     = require('child_process').spawn;
 const fetch     = require('./bch-fetch');
 
 let _validAlbumURLRgx = /^(https:\/\/)?\w+\.bandcamp\.com\/album\/.+$/g; 

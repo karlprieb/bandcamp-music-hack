@@ -1,27 +1,8 @@
 const cheerio   = require('cheerio');
+const fs        = require('fs');
+const request   = require('request');
 
-let _selector    = null;  
-
-let _contentHTML;
-let _MP3Regx;     
-let _extractMP3Url;
-let _URL;
-let _mp3;
-let _artist;
-let _track;
-
-function _bindMP3 (mp3, _song) {
-    /*mp3.stderr.on('data', (data) => {
-       console.log(`${_song}: ${data}`);
-    });*/
-
-    mp3.on('close', (code) => {
-        if(code === 0) {
-            let message = `\n\nDownload of ${_song} successfully done.`
-            console.log(message.trim());
-        }
-  });
-}
+const MP3_REGEX = /\{\"mp3-128\"\:\"\/\/(\S+)\"\}/i;
 
 class BchCrawler {
     constructor (content) {
@@ -29,32 +10,38 @@ class BchCrawler {
     }
 
     crawl () {
-        _contentHTML   = this.content.join('');
-        _MP3Regx = /\{\"mp3-128\"\:\"\/\/(\S+)\"\}/i;
         let spawn     = require('child_process').spawn;
-        let matchMP3Str =_MP3Regx.test(_contentHTML); 
+        let matchMP3Str = MP3_REGEX.test(this.content); 
 
         if (matchMP3Str) {
-            _selector      = cheerio.load(_contentHTML);
-            _artist        = this.getArtistName();
-            _track         = this.getTrackName();
-            let _song          = `${_artist} - ${_track}.mp3`;
-            _extractMP3Url = _MP3Regx.exec(_contentHTML)[1];
-            _URL           = `http://${_extractMP3Url}`;
-            _mp3           = spawn('wget', ['-O', `${_song}`, _URL]);
+            let selector      = cheerio.load(this.content);
+            let artist        = this.getArtistName(selector);
+            let track         = this.getTrackName(selector);
+            let song          = `${artist} - ${track}.mp3`;
+            let extractMP3Url = MP3_REGEX.exec(this.content)[1];
+            let url           = `http://${extractMP3Url}`;
+            let stream        = fs.createWriteStream(song);
 
-            _bindMP3.bind(this)(_mp3, _song);
+            request
+                .get(url)
+                .on('response', (response) => {
+                    console.log(`Download of ${song} successfully done.`);    
+                 })
+                .on('error', (err) => {
+                     console.log(`Err: ${err}`);    
+                 })
+                .pipe(fs.createWriteStream(song));
         }
     }
 
-    getTrackName () {
-        return _selector('#name-section')
+    getTrackName (selector) {
+        return selector('#name-section')
             .find('.trackTitle')
         .text().trim();
     }
 
-    getArtistName () {
-       return _selector('#name-section')
+    getArtistName (selector) {
+       return selector('#name-section')
             .find('.albumTitle')
             .find('span[itemprop=\'byArtist\']')
         .text().trim();

@@ -1,6 +1,14 @@
 const spawn   = require('child_process').spawn;
 const crawler = require('./bch-crawler'); 
 const cheerio = require('cheerio');
+const request = require('request');
+const fs      = require('fs');
+
+let _getAllLinksFromArtistPage = $ => $('.title-col').find('a');
+
+let _getBaseURL = fullURL => fullURL.split('/')[2];
+
+let _getFullURL = (trackURL, baseURL) => `https://${baseURL}${trackURL}`;
 
 class BchFetch {
     constructor(url) {
@@ -8,52 +16,29 @@ class BchFetch {
     }
 
     fetchOneTrack (url) {
-        let fetchedHTML = spawn('curl', [url]);
-        let content = [];
+        //let content = [];
 
-        fetchedHTML.stdout.on('data', (data) => {
-            content.push(data.toString());
-        });
+        request(url, (err, res, body) => {
+            if (err) throw `Error: ${err}`;
 
-        fetchedHTML.on('close', (code) => {
-            this.crawler = new crawler.BchCrawler(content);
+            //content.push(body);    
+            this.crawler = new crawler.BchCrawler(body);
             this.crawler.crawl(); 
         });
     }
 
     fetchMultipleTracks (url) {
-        let content = [];
-        let fetchedHTML = spawn('curl', [url]);
-        let fullURL = url;
+        request(url, (err, res, body) => {
+            if (err) throw `Error: ${err}`;
 
-        fetchedHTML.stdout.on('data', (data) => {
-            content.push(data.toString());
-        });
+            let self = this;
+            let $ = cheerio.load(body);
+            let songsEls = _getAllLinksFromArtistPage($);
+            let baseURL = _getBaseURL(url);
 
-        /*fetchedHTML.stderr.on('data', (err) => {
-            console.log(`${err}`);
-        });*/
-
-        fetchedHTML.on('close', (code) => {
-            if (code === 0) {
-                let $ = cheerio.load(content.join(''));
-                let songsEls = $('.title-col').find('a');
-                let baseURL = fullURL.split('/')[2]
-                let urls = []
-
-                let self = this;
-
-                songsEls.each(function () {
-                    let trackURL = $(this).attr('href').trim();
-                    let finalURL = `https://${baseURL}${trackURL}`;
-                    //console.log(finalURL);
-
-                    self.fetchOneTrack(finalURL);
-                })
-
-            } else {
-                throw `Error: Something went wrong. Code ${code}`;
-            }
+            songsEls.each(function () {
+                self.fetchOneTrack(_getFullURL($(this).attr('href').trim(), baseURL));
+            })
         });
     };
 }
