@@ -5,7 +5,8 @@
   "main": "bandcamp-hack.js",
   "dependencies": {
     "cheerio": "^0.20.0",
-    "commander": "^2.9.0"
+    "commander": "^2.9.0",
+    "request": "^2.74.0"
   },
   "devDependencies": {},
   "scripts": {
