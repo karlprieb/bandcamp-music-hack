@@ -1,4 +1,3 @@
-const spawn   = require('child_process').spawn;
 const crawler = require('./bch-crawler'); 
 const cheerio = require('cheerio');
 const request = require('request');
@@ -16,12 +15,9 @@ class BchFetch {
     }
 
     fetchOneTrack (url) {
-        //let content = [];
-
         request(url, (err, res, body) => {
             if (err) throw `Error: ${err}`;
 
-            //content.push(body);    
             this.crawler = new crawler.BchCrawler(body);
             this.crawler.crawl(); 
         });
