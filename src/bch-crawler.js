@@ -10,10 +10,7 @@ class BchCrawler {
     }
 
     crawl () {
-        let spawn     = require('child_process').spawn;
-        let matchMP3Str = MP3_REGEX.test(this.content); 
-
-        if (matchMP3Str) {
+        if (MP3_REGEX.test(this.content)) {
             let selector      = cheerio.load(this.content);
             let artist        = this.getArtistName(selector);
             let track         = this.getTrackName(selector);
