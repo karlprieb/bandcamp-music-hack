@@ -1,6 +1,7 @@
-const cheerio   = require('cheerio');
-const fs        = require('fs');
-const request   = require('request');
+const cheerio       = require('cheerio');
+const fs            = require('fs');
+const request       = require('request');
+const MultiProgress = require('multi-progress');
 
 const MP3_REGEX = /\{\"mp3-128\"\:\"\/\/(\S+)\"\}/i;
 
@@ -9,7 +10,7 @@ class BchCrawler {
         this.content = content;
     }
 
-    crawl () {
+    crawl (index) {
         if (MP3_REGEX.test(this.content)) {
             let selector      = cheerio.load(this.content);
             let artist        = this.getArtistName(selector);
@@ -18,16 +19,36 @@ class BchCrawler {
             let extractMP3Url = MP3_REGEX.exec(this.content)[1];
             let url           = `http://${extractMP3Url}`;
             let stream        = fs.createWriteStream(song);
+            let multi         = new MultiProgress(process.stderr);
 
             request
                 .get(url)
                 .on('response', (response) => {
+                    let size = parseInt(response.headers['content-length'], 10);
+                    let bar = multi.newBar('[:bar] :percent :etas', {
+                        complete:   '#',
+                        incomplete: ' ',
+                        width:      100,
+                        total:      size
+                    })
+
+                    response.on('data', (chunk) => {
+                        if (bar.tick) {
+                            bar.tick(chunk.length);
+                        }
+                    })
+                })
+                .on('error', (err) => {
+                    console.log(`Err: ${err}`);    
+                })
+                .pipe(fs.createWriteStream(song))
+                .on('close', (err) => {
+                    if (err) {
+                        console.log(`Err: ${err}`);
+                    }
+
                     console.log(`Download of ${song} successfully done.`);    
                  })
-                .on('error', (err) => {
-                     console.log(`Err: ${err}`);    
-                 })
-                .pipe(fs.createWriteStream(song));
         }
     }
 
